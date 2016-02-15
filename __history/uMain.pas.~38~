@@ -33,16 +33,7 @@ type
     procedure PrepareConnection(var UDPConnection: TUDPConnection);
     procedure OnReceive(Sender: TObject; TextMsg: string);
     procedure AddMessageToChat(TextMsg: string; Side: TSide);
-    procedure SetAddressToConnect(const Value: string);
-    procedure SetMyPort(const Value: Integer);
-    procedure SetPortToConnect(const Value: Integer);
-    function GetAddressToConnect(): string;
-    function GetMyPort(): Integer;
-    function GetPortToConnect(): Integer;
   public
-    property AddressToConnect: string read GetAddressToConnect write SetAddressToConnect;
-    property MyPort: Integer  read GetMyPort write SetMyPort;
-    property PortToConnect: Integer  read GetPortToConnect write SetPortToConnect;
     { Public declarations }
   end;
 
@@ -68,8 +59,9 @@ begin
   FreeAndNil(UDPConnection);
 
   try
-    UDPConnection := TUDPConnection.Create(Self, MyPort, 256);
-    UDPConnection.SetRecipientsAddressAndPort(AddressToConnect, PortToConnect);
+    UDPConnection := TUDPConnection.Create(Self, StrToInt(eMyPort.Text), 256);
+    UDPConnection.SetRecipientsAddressAndPort(
+      eAddressToConnect.Text, StrToInt(ePortToConnect.Text));
     UDPConnection.OnReceive := OnReceive;
   except
     FreeAndNil(UDPConnection);
@@ -79,15 +71,15 @@ end;
 
 procedure TfrMain.btSendClick(Sender: TObject);
 var
-  TextToSend: string;
+  S: string;
 begin
-  TextToSend := mMyMsg.Text;
-  if TextToSend = '' then
+  S := mMyMsg.Text;
+  if S = '' then
     Exit();
 
   try
-    FUDPConnection.Send(TextToSend);
-    AddMessageToChat(TextToSend, sMe);
+    FUDPConnection.Send(S);
+    AddMessageToChat(s, sMe);
   except
     ShowMessage('There''s no connection.');
   end;
@@ -117,33 +109,6 @@ end;
 procedure TfrMain.FormDestroy(Sender: TObject);
 begin
   FreeAndNil(FUDPConnection);
-end;
-
-function TfrMain.GetAddressToConnect: string;
-begin
-  Result := eAddressToConnect.Text;
-end;
-procedure TfrMain.SetAddressToConnect(const Value: string);
-begin
-  eAddressToConnect.Text := Value;
-end;
-
-function TfrMain.GetMyPort: Integer;
-begin
-  Result := StrToInt(eMyPort.Text);
-end;
-procedure TfrMain.SetMyPort(const Value: Integer);
-begin
-  eMyPort.Text := IntToStr(Value);
-end;
-
-function TfrMain.GetPortToConnect: Integer;
-begin
-  Result := StrToInt(ePortToConnect.Text);
-end;
-procedure TfrMain.SetPortToConnect(const Value: Integer);
-begin
-  ePortToConnect.Text := IntToStr(Value);
 end;
 
 end.
